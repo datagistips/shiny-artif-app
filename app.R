@@ -135,6 +135,21 @@ server <- function(input, output) {
         proxy %>% 
             clearMarkers() %>% 
             addMarkers(data = myComm %>% st_centroid)
+        
+        # Ajoute le contour de la commune
+        proxy %>% 
+            clearShapes() %>% 
+            addPolygons(data = myComm,
+                        color = paletteCerema$secondaire$orange, 
+                        weight = 1, 
+                        smoothFactor = 0.5,
+                        opacity = 1, 
+                        fillOpacity = 0.3,
+                        fillColor = paletteCerema$secondaire$orange,
+                        highlightOptions = highlightOptions(color = paletteCerema$secondaire$orange, 
+                                                            weight = 2,
+                                                            fillOpacity = 0.1,
+                                                            bringToFront = TRUE))
     })
     
     output$foo <- renderPrint({
