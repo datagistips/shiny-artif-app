@@ -4,6 +4,7 @@ library(sf)
 library(glue)
 library(streamgraph)
 library(rjson)
+library(leaflet)
 
 # Flux sur PACA
 flux <- read_csv("data/obs_artif_conso_com_2009_2020_V2.csv", na = c("", "NULL")) %>% 
@@ -40,6 +41,7 @@ ui <- fluidPage(
     sidebarLayout(
         sidebarPanel(
             selectInput("communes", label = NULL, choices = communes, selected = NULL),
+            leafletOutput("mymap")
         ),
 
         mainPanel(
@@ -100,6 +102,12 @@ server <- function(input, output) {
     fComm <- reactive({
         fComm <- flux %>% filter(idcom == input$communes)
         return(fComm)
+    })
+    
+    output$mymap <- renderLeaflet({
+        
+        leaflet() %>%
+            addTiles(group = "OSM")
     })
     
     output$uiCommune <- renderUI({
