@@ -106,8 +106,14 @@ server <- function(input, output) {
     
     output$mymap <- renderLeaflet({
         
+        bb <- st_bbox(comms) %>% as.numeric
+        
         leaflet() %>%
-            addTiles(group = "OSM")
+            addTiles(group = "OSM") %>%
+            fitBounds(lng1 = bb[1], 
+                      lat1 = bb[2], 
+                      lng2 = bb[3], 
+                      lat2 = bb[4])
     })
     
     output$uiCommune <- renderUI({
