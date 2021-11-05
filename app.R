@@ -102,7 +102,7 @@ server <- function(input, output) {
         codeInsee <- input$communes
         fComm <- flux %>% filter(idcom == codeInsee)
         
-        tagList(h3(fComm$idcomtxt, glue("({fComm$idcom})"), 
+        div(h3(fComm$idcomtxt, glue("({fComm$idcom})"), 
                    style=glue("color:{paletteCerema$secondaire$orange};")), 
                 tags$span(tags$span(fComm$artcom0920, " %", 
                                     style=glue("font-weight:700;
@@ -111,18 +111,30 @@ server <- function(input, output) {
                                                 padding:5px;
                                                 border-radius:2px;
                                                 margin-right:5px;")), 
-                          " de surface artificialisée entre 2009 et 2020")
+                          " de surface artificialisée entre 2009 et 2020"),
+            style="margin-bottom:20px;"
         )
     })
 
     output$streamPlot <- renderUI({
-        req(input$communes)
         
         codeInsee <- input$communes
+        fComm <- flux %>% filter(idcom == codeInsee)
         myStream <- flux %>% makeStream(codeInsee)
         
-        tagList(
+        div(
             div(
+                tags$span(tags$span(format(fComm$nafart0920, 
+                                           big.mark=" ", 
+                                           scientific = FALSE), 
+                                    " hectares", 
+                                    style=glue("font-weight:700;
+                                               color:white;
+                                               background-color:{paletteCerema$principale$bleu};
+                                               padding:5px;
+                                               border-radius:2px;
+                                               margin-right:5px;")), 
+                          " artificialisés entre 2009 et 2020"),
                 myStream,
                 style="margin-bottom:20px;"
             ),
@@ -134,7 +146,6 @@ server <- function(input, output) {
                 style="text-align:center"
             ))
     })
-    
 }
 
 # Run the application 
