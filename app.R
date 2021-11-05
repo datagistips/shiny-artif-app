@@ -3,6 +3,7 @@ library(tidyverse)
 library(sf)
 library(glue)
 library(streamgraph)
+library(rjson)
 
 # Flux sur PACA
 flux <- read_csv("data/obs_artif_conso_com_2009_2020_V2.csv", na = c("", "NULL")) %>% 
@@ -27,6 +28,9 @@ myPalette <<- c("blue" = colorBlue,
                 "magenta" = colorMagenta,
                 "grey" = colorGrey)
 
+# Palette de couleurs
+paletteCerema <- fromJSON(file = "palette_cerema.json")
+
 ui <- fluidPage(
 
     # Application title
@@ -39,7 +43,7 @@ ui <- fluidPage(
         ),
 
         mainPanel(
-            textOutput("txtCommune"),
+            uiOutput("uiCommune"),
             uiOutput("streamPlot")
         )
     )
@@ -93,11 +97,22 @@ server <- function(input, output) {
             sg_fill_manual(rev(myPalette))
     }
     
-    output$txtCommune <- renderText({
+    output$uiCommune <- renderUI({
+        
         codeInsee <- input$communes
         fComm <- flux %>% filter(idcom == codeInsee)
         
-        paste(fComm$idcomtxt, fComm$idcom, fComm$artcom0920)
+        tagList(h3(fComm$idcomtxt, glue("({fComm$idcom})"), 
+                   style=glue("color:{paletteCerema$secondaire$orange};")), 
+                tags$span(tags$span(fComm$artcom0920, " %", 
+                                    style=glue("font-weight:700;
+                                                color:white;
+                                                background-color:{paletteCerema$secondaire$orange};
+                                                padding:5px;
+                                                border-radius:2px;
+                                                margin-right:5px;")), 
+                          " de surface artificialisée entre 2009 et 2020")
+        )
     })
 
     output$streamPlot <- renderUI({
