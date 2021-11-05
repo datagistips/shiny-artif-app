@@ -2,6 +2,7 @@ library(shiny)
 library(tidyverse)
 library(sf)
 library(glue)
+library(streamgraph)
 
 # Flux sur PACA
 flux <- read_csv("data/obs_artif_conso_com_2009_2020_V2.csv", na = c("", "NULL")) %>% 
@@ -15,7 +16,17 @@ comms <<- readRDS("data/comms.rds") %>%
 communes <- flux$idcom
 names(communes) <- glue("{flux$idcomtxt} ({flux$idcom})")
 
-# Define UI for application that draws a histogram
+# Palette 
+colorBlue    <- hcl(h = 220, c = 50, l = 80, fixup = TRUE)
+colorRed     <- hcl(h = 4, c = 50, l = 80, fixup = TRUE)
+colorMagenta <- hcl(h = 300, c = 50, l = 80, fixup = TRUE)
+colorGrey    <- hcl(h = 0, c = 0, l = 80, fixup = TRUE)
+
+myPalette <<- c("blue" = colorBlue,
+                "red" = colorRed,
+                "magenta" = colorMagenta,
+                "grey" = colorGrey)
+
 ui <- fluidPage(
 
     # Application title
@@ -29,7 +40,7 @@ ui <- fluidPage(
 
         # Show a plot of the generated distribution
         mainPanel(
-          dataTableOutput("tbResults")
+            streamgraphOutput("streamPlot")
         )
     )
 )
@@ -67,11 +78,25 @@ server <- function(input, output) {
         
         return(df)
     }
-
-    output$tbResults <- renderDataTable({
-        codeInsee <- input$communes
+    
+    makeStream <- function(flux, codeInsee) {
+        
         df <- flux %>% getStatsFlux(codeInsee)
-        return(df)
+        
+        # L'ordre des inverse dans les streamgraphs
+        df$type <- factor(df$type, levels = c("Inconnu", "Mixte", "Activité", "Habitat"))
+        
+        # Plot
+        df %>%
+            streamgraph("type", "value", "year", sort = FALSE, height = '350px') %>%
+            sg_axis_x(1, "Année", "%Y") %>% 
+            sg_fill_manual(rev(myPalette))
+    }
+
+    output$streamPlot <- renderStreamgraph({
+        codeInsee <- input$communes
+        myStream <- flux %>% makeStream(codeInsee)
+        return(myStream)
     })
     
 }
