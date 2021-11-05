@@ -45,6 +45,7 @@ ui <- fluidPage(
         ),
 
         mainPanel(
+            verbatimTextOutput("foo"),
             uiOutput("uiCommune"),
             uiOutput("streamPlot")
         )
@@ -102,6 +103,10 @@ server <- function(input, output) {
     fComm <- reactive({
         fComm <- flux %>% filter(idcom == input$communes)
         return(fComm)
+    })
+    
+    output$foo <- renderPrint({
+        input$mymap_click
     })
     
     output$mymap <- renderLeaflet({
