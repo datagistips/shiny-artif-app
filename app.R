@@ -150,6 +150,14 @@ server <- function(input, output) {
                                                             weight = 2,
                                                             fillOpacity = 0.1,
                                                             bringToFront = TRUE))
+        
+        # Aller vers la commune
+        bb <- st_bbox(myComm)
+        proxy %>%
+            flyToBounds(lng1 = as.numeric(bb$xmin),
+                        lat1 = as.numeric(bb$ymin),
+                        lng2 = as.numeric(bb$xmax),
+                        lat2 = as.numeric(bb$ymax))
     })
     
     output$foo <- renderPrint({
