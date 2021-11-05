@@ -97,14 +97,16 @@ server <- function(input, output) {
             sg_fill_manual(rev(myPalette))
     }
     
+    fComm <- reactive({
+        fComm <- flux %>% filter(idcom == input$communes)
+        return(fComm)
+    })
+    
     output$uiCommune <- renderUI({
         
-        codeInsee <- input$communes
-        fComm <- flux %>% filter(idcom == codeInsee)
-        
-        div(h3(fComm$idcomtxt, glue("({fComm$idcom})"), 
+        div(h3(fComm()$idcomtxt, glue("({fComm()$idcom})"), 
                    style=glue("color:{paletteCerema$secondaire$orange};")), 
-                tags$span(tags$span(fComm$artcom0920, " %", 
+                tags$span(tags$span(fComm()$artcom0920, " %", 
                                     style=glue("font-weight:700;
                                                 color:white;
                                                 background-color:{paletteCerema$secondaire$orange};
@@ -119,12 +121,11 @@ server <- function(input, output) {
     output$streamPlot <- renderUI({
         
         codeInsee <- input$communes
-        fComm <- flux %>% filter(idcom == codeInsee)
         myStream <- flux %>% makeStream(codeInsee)
         
         div(
             div(
-                tags$span(tags$span(format(fComm$nafart0920, 
+                tags$span(tags$span(format(fComm()$nafart0920, 
                                            big.mark=" ", 
                                            scientific = FALSE), 
                                     " hectares", 
