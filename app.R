@@ -101,6 +101,8 @@ server <- function(input, output) {
     }
     
     fComm <- reactive({
+        req(codeInsee())
+        
         fComm <- flux %>% filter(idcom == codeInsee())
         return(fComm)
     })
@@ -153,6 +155,7 @@ server <- function(input, output) {
     })
     
     output$uiCommune <- renderUI({
+        req(fComm())
         
         div(h3(fComm()$idcomtxt, glue("({fComm()$idcom})"), 
                    style=glue("color:{paletteCerema$secondaire$orange};")), 
@@ -169,6 +172,7 @@ server <- function(input, output) {
     })
 
     output$streamPlot <- renderUI({
+        req(fComm())
         
         codeInsee <- input$communes
         myStream <- flux %>% makeStream(codeInsee())
