@@ -112,7 +112,7 @@ server <- function(input, output) {
     
     codeInsee <- reactive({
         
-        if(is.null(input$mymap_click)) return()
+        if(is.null(input$mymap_click)) return() # retourne un élément vide si on n'a pas encore cliqué sur la carte
         
         getCommCenter <- function(comms, coords) {
             pt <- coords %>% st_point %>% st_sfc %>% st_set_crs(4326)
@@ -199,7 +199,8 @@ server <- function(input, output) {
     })
     
     output$uiCommune <- renderUI({
-        req(fComm())
+        
+        if(is.null(codeInsee())) return(tagList(icon("mouse-pointer"), "Cliquez sur la carte pour afficher les statistiques"))
         
         div(h3(fComm()$idcomtxt, glue("({fComm()$idcom})"), 
                    style=glue("color:{paletteCerema$secondaire$orange};")), 
@@ -218,7 +219,6 @@ server <- function(input, output) {
     output$streamPlot <- renderUI({
         req(fComm())
         
-        codeInsee <- input$communes
         myStream <- flux %>% makeStream(codeInsee())
         
         div(
