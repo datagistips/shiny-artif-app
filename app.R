@@ -45,7 +45,7 @@ ui <- fluidPage(
         ),
 
         mainPanel(
-            verbatimTextOutput("foo"),
+            # verbatimTextOutput("foo"),
             uiOutput("uiCommune"),
             uiOutput("streamPlot")
         )
@@ -123,6 +123,18 @@ server <- function(input, output) {
         codeInsee <- comms %>% getCommCenter(coords)
         
         return(codeInsee)
+    })
+    
+    proxy <- leafletProxy("mymap")
+    
+    observe({
+        req(codeInsee())
+        myComm <- comms %>% filter(INSEE_COM == codeInsee())
+        
+        # Ajout du marqueur
+        proxy %>% 
+            clearMarkers() %>% 
+            addMarkers(data = myComm %>% st_centroid)
     })
     
     output$foo <- renderPrint({
