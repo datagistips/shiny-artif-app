@@ -17,6 +17,9 @@ comms <<- readRDS("data/comms.rds") %>%
 # Liste communes
 communes <- flux$idcom
 names(communes) <- glue("{flux$idcomtxt} ({flux$idcom})")
+communes <- communes[order(names(communes))]
+communes2 <- c("", communes)
+names(communes2) <- c("Aller vers une commune", names(communes))
 
 # Palette 
 colorBlue    <- hcl(h = 220, c = 50, l = 80, fixup = TRUE)
@@ -40,7 +43,7 @@ ui <- fluidPage(
     # Sidebar
     sidebarLayout(
         sidebarPanel(
-            selectInput("communes", label = NULL, choices = communes, selected = NULL),
+            selectInput("communes", label = NULL, choices = communes2, selected = NULL),
             leafletOutput("mymap")
         ),
 
