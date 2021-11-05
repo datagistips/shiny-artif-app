@@ -105,8 +105,26 @@ server <- function(input, output) {
         return(fComm)
     })
     
+    codeInsee <- reactive({
+        
+        if(is.null(input$mymap_click)) return()
+        
+        getCommCenter <- function(comms, coords) {
+            pt <- coords %>% st_point %>% st_sfc %>% st_set_crs(4326)
+            i <- st_intersects(comms, pt)
+            w <- which(sapply(i, function(x) length(x) != 0))
+            codeInsee <- comms$INSEE_COM[w]
+            return(codeInsee)
+        }
+        
+        coords <- c(input$mymap_click$lng, input$mymap_click$lat)
+        codeInsee <- comms %>% getCommCenter(coords)
+        
+        return(codeInsee)
+    })
+    
     output$foo <- renderPrint({
-        input$mymap_click
+        codeInsee()
     })
     
     output$mymap <- renderLeaflet({
