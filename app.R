@@ -160,6 +160,12 @@ server <- function(input, output) {
                         lat2 = as.numeric(bb$ymax))
     })
     
+    observeEvent(input$communes, {
+        codeInsee <- input$communes
+        bb <- comms %>% filter(INSEE_COM == codeInsee) %>% st_bbox %>% as.numeric
+        proxy %>% flyToBounds(lng1 = bb[1], lat1 = bb[2], lng2 = bb[3], lat2 = bb[4])
+    })
+    
     output$foo <- renderPrint({
         codeInsee()
     })
