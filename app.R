@@ -110,10 +110,23 @@ server <- function(input, output) {
         
         leaflet() %>%
             addTiles(group = "OSM") %>%
-            fitBounds(lng1 = bb[1], 
-                      lat1 = bb[2], 
-                      lng2 = bb[3], 
-                      lat2 = bb[4])
+            addProviderTiles(providers$CartoDB.PositronOnlyLabels, group = "Villes") %>% 
+            addTiles("http://wxs.ign.fr/choisirgeoportail/wmts?REQUEST=GetTile&SERVICE=WMTS&VERSION=1.0.0&STYLE=normal&TILEMATRIXSET=PM&FORMAT=image/png&LAYER=GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}",
+                     options = c(WMSTileOptions(tileSize = 256),
+                                 providerTileOptions(minZoom = 1, maxZoom = 15)),
+                     attribution='<a target="_blank" href="https://www.geoportail.gouv.fr/">Geoportail France</a>',
+                     group = "Plan IGN"
+            ) %>%
+            addTiles("http://wxs.ign.fr/choisirgeoportail/wmts?REQUEST=GetTile&SERVICE=WMTS&VERSION=1.0.0&STYLE=normal&TILEMATRIXSET=PM&FORMAT=image/jpeg&LAYER=ORTHOIMAGERY.ORTHOPHOTOS&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}",
+                     options = c(WMSTileOptions(tileSize = 256),
+                                 providerTileOptions(minZoom = 1, maxZoom = 22)),
+                     attribution='<a target="_blank" href="https://www.geoportail.gouv.fr/">Geoportail France</a>',
+                     group = "Photo aérienne"
+            ) %>%
+            addLayersControl(baseGroups    = c("Photo aérienne", "Plan IGN", "OSM"),
+                             overlayGroups = "Villes",
+                             options       = layersControlOptions(collapsed = FALSE)) %>%
+            fitBounds(lng1 = bb[1], lat1 = bb[2], lng2 = bb[3], lat2 = bb[4])
     })
     
     output$uiCommune <- renderUI({
