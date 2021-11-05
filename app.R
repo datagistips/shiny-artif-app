@@ -5,6 +5,7 @@ library(glue)
 library(streamgraph)
 library(rjson)
 library(leaflet)
+library(plotly)
 
 # Flux sur PACA
 flux <- read_csv("data/obs_artif_conso_com_2009_2020_V2.csv", na = c("", "NULL")) %>% 
@@ -50,7 +51,7 @@ ui <- fluidPage(
         mainPanel(
             # verbatimTextOutput("foo"),
             uiOutput("uiCommune"),
-            uiOutput("streamPlot")
+            uiOutput("streamAndTreemap")
         )
     )
 )
@@ -101,6 +102,35 @@ server <- function(input, output) {
             streamgraph("type", "value", "year", sort = FALSE, height = '350px') %>%
             sg_axis_x(1, "Année", "%Y") %>% 
             sg_fill_manual(rev(myPalette))
+    }
+    
+    makeTreemap <- function(flux, codeInsee) {
+        df <- flux %>% filter(idcom == codeInsee)
+        
+        df <- df %>% gather("variable",
+                            "value",
+                            c("arthab0920", "artact0920", "artmix0920", "artinc0920"))
+        
+        df$variable <- case_when(
+            df$variable == "arthab0920" ~ "Habitat",
+            df$variable == "artact0920" ~ "Activité",
+            df$variable == "artmix0920" ~ "Mixte",
+            df$variable == "artinc0920" ~ "NC"
+        )
+        
+        # Par. treemap
+        labels = df$variable
+        parents = rep("", nrow(df))
+        values = df$value
+        
+        fig <- plot_ly(
+            type="treemap",
+            labels=labels,
+            parents=parents,
+            values=values,
+            marker=list(colors = myPalette))
+        
+        fig
     }
     
     fComm <- reactive({
@@ -216,7 +246,7 @@ server <- function(input, output) {
         )
     })
 
-    output$streamPlot <- renderUI({
+    output$streamAndTreemap <- renderUI({
         req(fComm())
         
         myStream <- flux %>% makeStream(codeInsee())
@@ -237,13 +267,13 @@ server <- function(input, output) {
                 myStream,
                 style="margin-bottom:20px;"
             ),
-            div(
-                tags$span("Habitat", style = glue("background-color:{myPalette['blue']};padding:10px;")),
-                tags$span("Activité", style = glue("background-color:{myPalette['red']};padding:10px;")),
-                tags$span("Mixte", style = glue("background-color:{myPalette['magenta']};padding:10px;")),
-                tags$span("Inconnu", style = glue("background-color:{myPalette['grey']};padding:10px;")),
-                style="text-align:center"
-            ))
+            div(plotlyOutput("treemap")), 
+            style="margin-bottom:20px;")
+    })
+    
+    output$treemap <- renderPlotly({
+        req(codeInsee())
+        flux %>% makeTreemap(codeInsee())  
     })
 }
 
