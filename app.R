@@ -40,7 +40,7 @@ ui <- fluidPage(
 
         mainPanel(
             textOutput("txtCommune"),
-            streamgraphOutput("streamPlot")
+            uiOutput("streamPlot")
         )
     )
 )
@@ -100,10 +100,24 @@ server <- function(input, output) {
         paste(fComm$idcomtxt, fComm$idcom, fComm$artcom0920)
     })
 
-    output$streamPlot <- renderStreamgraph({
+    output$streamPlot <- renderUI({
+        req(input$communes)
+        
         codeInsee <- input$communes
         myStream <- flux %>% makeStream(codeInsee)
-        return(myStream)
+        
+        tagList(
+            div(
+                myStream,
+                style="margin-bottom:20px;"
+            ),
+            div(
+                tags$span("Habitat", style = glue("background-color:{myPalette['blue']};padding:10px;")),
+                tags$span("Activité", style = glue("background-color:{myPalette['red']};padding:10px;")),
+                tags$span("Mixte", style = glue("background-color:{myPalette['magenta']};padding:10px;")),
+                tags$span("Inconnu", style = glue("background-color:{myPalette['grey']};padding:10px;")),
+                style="text-align:center"
+            ))
     })
     
 }
