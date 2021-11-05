@@ -101,7 +101,7 @@ server <- function(input, output) {
     }
     
     fComm <- reactive({
-        fComm <- flux %>% filter(idcom == input$communes)
+        fComm <- flux %>% filter(idcom == codeInsee())
         return(fComm)
     })
     
@@ -171,7 +171,7 @@ server <- function(input, output) {
     output$streamPlot <- renderUI({
         
         codeInsee <- input$communes
-        myStream <- flux %>% makeStream(codeInsee)
+        myStream <- flux %>% makeStream(codeInsee())
         
         div(
             div(
