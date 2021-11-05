@@ -38,8 +38,8 @@ ui <- fluidPage(
             selectInput("communes", label = NULL, choices = communes, selected = NULL),
         ),
 
-        # Show a plot of the generated distribution
         mainPanel(
+            textOutput("txtCommune"),
             streamgraphOutput("streamPlot")
         )
     )
@@ -92,6 +92,13 @@ server <- function(input, output) {
             sg_axis_x(1, "Année", "%Y") %>% 
             sg_fill_manual(rev(myPalette))
     }
+    
+    output$txtCommune <- renderText({
+        codeInsee <- input$communes
+        fComm <- flux %>% filter(idcom == codeInsee)
+        
+        paste(fComm$idcomtxt, fComm$idcom, fComm$artcom0920)
+    })
 
     output$streamPlot <- renderStreamgraph({
         codeInsee <- input$communes
