@@ -2,8 +2,6 @@
 
 ![](thumbnail.png)
 
-👉 Voir la rubrique [tuto](#tuto) pour voir la création pas à pas de l'application
-
 ## Installation
 Préambule :
 
@@ -18,6 +16,6 @@ Préambule :
 4. Cliquer sur **Run**
 
 ## Tuto
-[Accéder au notebook expliquant la création de l'application Shiny](https://github.com/datagistips/shiny-artif/blob/master/notebook/8-notebook-shiny.Rmd)  
-[Vous pouvez aussi accéder à la version HTML](https://github.com/datagistips/shiny-artif/blob/master/notebook/8-notebook-shiny.html)
+👉 [Accéder au notebook expliquant la création de l'application Shiny](https://github.com/datagistips/shiny-artif/blob/master/notebook/8-notebook-shiny.Rmd)  
+👉 [Vous pouvez aussi accéder à la version HTML](https://github.com/datagistips/shiny-artif/blob/master/notebook/8-notebook-shiny.html)
 
