@@ -5,7 +5,11 @@
 👉 Voir la rubrique [tuto](#tuto) pour voir la création pas à pas de l'application
 
 ## Installation
-1. Télécharger l'application :
+Préambule :
+
+1. Installer [R](https://cran.r-project.org/bin/)
+2. Installer [RStudio](https://www.rstudio.com/products/rstudio/download/)
+1. Télécharger l'application ici présente :
 
 		git clone https://github.com/datagistips/shiny-artif-app.git
 
