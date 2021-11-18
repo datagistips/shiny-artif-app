@@ -16,5 +16,5 @@ Préambule :
 4. Cliquer sur **Run**
 
 ## Tuto
-👉 [Accéder au notebook expliquant la création de l'application Shiny](https://github.com/datagistips/shiny-artif/blob/master/notebooks/8-notebook-shiny.Rmd) ['version HTML)](https://github.com/datagistips/shiny-artif/blob/master/notebooks/8-notebook-shiny.html)
+👉 [Accéder au notebook expliquant la création de l'application Shiny](https://github.com/datagistips/shiny-artif/blob/master/notebooks/8-notebook-shiny.Rmd) | [version HTML](https://github.com/datagistips/shiny-artif/blob/master/notebooks/8-notebook-shiny.html)
 
