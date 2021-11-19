@@ -7,6 +7,8 @@ library(rjson)
 library(leaflet)
 library(plotly)
 
+source("helpers.R", encoding = "UTF-8")
+
 # Flux sur PACA
 flux <- read_csv("data/obs_artif_conso_com_2009_2020_V2.csv", na = c("", "NULL")) %>% 
   filter(idreg == "93")
