@@ -2,6 +2,8 @@
 
 ![](thumbnail.png)
 
+https://datagistips.shinyapps.io/shiny-artif/
+
 ## Installation
 Préambule :
 
