@@ -5,7 +5,7 @@ account: datagistips
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 5179392
-bundleId: 5279159
+bundleId: 5279206
 url: https://datagistips.shinyapps.io/artif0920/
-when: 1637574382.56272
-lastSyncTime: 1637574382.56272
+when: 1637575108.28317
+lastSyncTime: 1637575108.28317
