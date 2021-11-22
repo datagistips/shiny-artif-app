@@ -2,7 +2,7 @@
 
 ![](thumbnail.png)
 
-https://datagistips.shinyapps.io/shiny-artif/
+Accéder à l'application : https://datagistips.shinyapps.io/shiny-artif/
 
 ## Installation
 Préambule :
