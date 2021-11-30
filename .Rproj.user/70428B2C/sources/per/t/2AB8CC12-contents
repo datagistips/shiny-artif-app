@@ -1,0 +1,414 @@
+---
+title: "Dataviz Notebook #8"
+output:
+  html_document:
+    df_print: paged
+    toc: true
+    toc_depth: 2
+    toc_float: true
+---
+
+git log --reverse --pretty=oneline
+```
+006bc70d801a290ef1771b69cd2ded14e0b12516 init
+414c6942ce44edd411e256ab0295bb50de2fa059 pose les bases
+9c271b706e34afff002b6e6d5df7ef895af1907e ajoute la liste des communes
+64c7a25268157cf832c9b57dc71b7dfffd663d9e affiche un tableau des résultats
+a402e8385afcf0c350ac0841037a69383e85eace ajoute le stream
+602a3ea312be829aca7146e5563c001cdd33e823 ajoute les infos communales
+9c2ab647d7d7376fa84ee19b3239822260933d77 ajoute la légende
+c1868418f645a374a8bfda9a3fb11bc0d72a18ec titre avec couleurs cerema
+9c6f9bed953ea15b948fa371a1d988df5acd27ee ajoute la surface artificialisée totale
+739307b7430ab0d52f3c241fd16d4404c80c927b ajout de reactive fComm
+5e5be7cf03e9ad4d145c292477d958af00f76904 ajoute la carte leaflet
+593b2972d14ee8f0f044fb43b2abc41932c4b1ab centre la carte sur PACA
+fb67dcc4b87bc13a8cb81847be5c4d5aee1e2b95 ajoute les fonds de carte
+a9fd41bd65be309d9a5c9e37835bad164ee9b37c coordonnées au clic
+4ac477bd273eaf5db7b0511764c9555182ef423e rend codeInsee reactive
+f3d3ffb842c07aaa67a9e4c48b922e8b4fa858dc ajoute le reactive
+115ac4ea9c236d74fcbfd1cb2d48d3ae6309b063 fix : ajoute req
+5821ff9c63199ec0bae647a5874f2080bb9d3d5a ajoute un marqueur
+9b4455e5213c849edcdad0a9d2f905f377f2f84a ajoute le contour de la commune
+404f64ab1fbd9fe00dd9da0634faf407007278b5 va vers la commune
+d295c184cd8801dfdcc4befb414d98ea8c0d4ea9 la liste déroulante permet d'aller vers une commune
+4e5c6628148bb98841d8468d10dea8a69b2e5c6d ajoute l'élément vide à la liste des communes
+56fd55bfa4cc066af658f7c779398c95c8276275 précise qu'il faut cliquer sur la carte pour afficher les stats
+1edc95aebfe35df74ca77370b78dc1d0402157a6 ajoute la treemap et supprime la légende
+592bb87d52248ccd7190d4b24fbebe93909877e7 fichier comms sur paca
+424c6b2b16f0cebbe5b51edca7a8a350b6b5d642 (HEAD -> master, origin/master) README
+```	
+
+## Init
+[Voir cette version](https://github.com/datagistips/shiny-artif-app/commit/006bc70d801a290ef1771b69cd2ded14e0b12516)
+Quand on crée une appli Shiny, on a un canevas d'exemple :
+
+## Pose les bases 
+Dans un premier temps, on pose les bases :
+
+### ui.R
+```{r eval = FALSE}
+    sidebarLayout(
+        sidebarPanel(
+            "liste",
+        ),
+
+        mainPanel(
+           "résultats"
+        )
+    )
+```
+[Voir cette version](https://github.com/datagistips/shiny-artif-app/commit/414c6942ce44edd411e256ab0295bb50de2fa059)
+
+### server.R
+La partie est laissée vide pour le moment :
+```{r eval = FALSE}
+server <- function(input, output) {
+# vide
+}
+```
+
+## Ajoute la liste des communes
+On récupère la liste des communes :
+```{r eval = FALSE}
+# Contours de communes
+comms <<- readRDS("data/comms.rds") %>% 
+    filter(INSEE_REG == 93)
+
+# Liste communes
+communes <- flux$idcom
+names(communes) <- glue("{flux$idcomtxt} ({flux$idcom})")
+```
+[Voir cette version](https://github.com/datagistips/shiny-artif-app/commit/9c271b706e34afff002b6e6d5df7ef895af1907e)
+
+### ui.R
+On ajoute la liste des communes :
+```{r eval = FALSE}
+    sidebarLayout(
+        sidebarPanel(
+            selectInput("communes", label = NULL, choices = communes, selected = NULL),
+        ),
+
+        mainPanel(
+           "Résultats"
+        )
+    )
+
+```
+
+##  Affiche un tableau des résultats
+### ui.R
+```{r eval = FALSE}
+mainPanel(
+          dataTableOutput("tbResults")
+        )
+```
+
+### server.R
+On ajoute les résultats avec renderDataTable et dataTableOutput :
+```{r eval = FALSE}
+    output$tbResults <- renderDataTable({
+        codeInsee <- input$communes
+        df <- flux %>% getStatsFlux(codeInsee)
+        return(df)
+    })
+```
+[Voir cette version](https://github.com/datagistips/shiny-artif-app/commit/64c7a25268157cf832c9b57dc71b7dfffd663d9e)
+
+## Ajoute le stream
+
+### ui.R
+On ajoute le streamgraph :
+```{r eval = FALSE}
+mainPanel(
+            streamgraphOutput("streamPlot")
+        )
+```
+
+### server.R
+```{r eval = FALSE}
+    output$streamPlot <- renderStreamgraph({
+        myStream <- flux %>% makeStream(codeInsee)
+        return(myStream)
+    })
+```
+[Voir cette version](https://github.com/datagistips/shiny-artif-app/commit/a402e8385afcf0c350ac0841037a69383e85eace)
+
+## Ajoute les infos communales
+```{r eval = FALSE}
+mainPanel(
+    textOutput("txtCommune"),
+    streamgraphOutput("streamPlot")
+)
+
+```
+
+```{r eval = FALSE}
+output$txtCommune <- renderText({
+    codeInsee <- input$communes
+    fComm <- flux %>% filter(idcom == codeInsee)
+
+    paste(fComm$idcomtxt, fComm$idcom, fComm$artcom0920)
+})
+```
+[Voir cette version](https://github.com/datagistips/shiny-artif-app/commit/602a3ea312be829aca7146e5563c001cdd33e823)
+
+## Ajoute la légende
+Pour la légende, on utilise simplement de l'HTML stylisé, plutôt que la légende du plot :
+```{r eval = FALSE}
+tagList(
+            div(
+                myStream,
+                style="margin-bottom:20px;"
+            ),
+            div(
+                tags$span("Habitat",
+                          style = glue("background-color:{myPalette['blue']};padding:10px;")),
+                tags$span("Activité",
+                          style = glue("background-color:{myPalette['red']};padding:10px;")),
+                tags$span("Mixte",
+                          style = glue("background-color:{myPalette['magenta']};padding:10px;")),
+                tags$span("Inconnu",
+                          style = glue("background-color:{myPalette['grey']};padding:10px;")),
+                style="text-align:center"
+            )
+        )
+```
+[Voir cette version](https://github.com/datagistips/shiny-artif-app/commit/9c2ab647d7d7376fa84ee19b3239822260933d77)
+
+
+## Titre avec couleurs cerema
+[Voir cette version](https://github.com/datagistips/shiny-artif-app/commit/c1868418f645a374a8bfda9a3fb11bc0d72a18ec)
+
+##  Ajoute la surface artificialisée totale
+[Voir cette version](https://github.com/datagistips/shiny-artif-app/commit/9c6f9bed953ea15b948fa371a1d988df5acd27ee)
+
+##  Ajout de reactive fComm
+[Voir cette version](https://github.com/datagistips/shiny-artif-app/commit/739307b7430ab0d52f3c241fd16d4404c80c927b)
+
+On ajoute une légende :
+### server.R
+```{r eval = FALSE}
+fComm <- reactive({
+    fComm <- flux %>% filter(idcom == input$communes)
+    return(fComm)
+})
+```
+
+On peut récupérer les variables comme ceci :
+```{r eval = FALSE}
+fComm()$artcom0920
+fComm()$nafart0920
+```
+
+##  Ajoute la carte leaflet
+
+### ui.R
+```{r eval = FALSE}
+leafletOutput("mymap")
+```
+
+### server.R
+```{r eval = FALSE}
+output$mymap <- renderLeaflet({
+
+        leaflet() %>%
+            addTiles(group = "OSM")
+})
+```
+[Voir cette version](https://github.com/datagistips/shiny-artif-app/commit/5e5be7cf03e9ad4d145c292477d958af00f76904)
+
+##  Centre la carte sur PACA
+```{r eval = FALSE}
+output$mymap <- renderLeaflet({
+
+        bb <- st_bbox(comms) %>% as.numeric
+
+        leaflet() %>%
+            addTiles(group = "OSM") %>%
+            fitBounds(lng1 = bb[1], 
+                      lat1 = bb[2], 
+                      lng2 = bb[3], 
+                      lat2 = bb[4])
+    })
+```
+[Voir cette version](https://github.com/datagistips/shiny-artif-app/commit/593b2972d14ee8f0f044fb43b2abc41932c4b1ab)
+
+## Ajoute les fonds de carte
+### server.R
+```{r eval = FALSE}
+output$mymap <- renderLeaflet({
+
+    leaflet() %>%
+            addTiles(group = "OSM") %>%
+            addProviderTiles(providers$CartoDB.PositronOnlyLabels, group = "Villes") %>% 
+            addTiles("http://wxs.ign.fr/choisirgeoportail/wmts?REQUEST=GetTile&SERVICE=WMTS&VERSION=1.0.0&STYLE=normal&TILEMATRIXSET=PM&FORMAT=image/png&LAYER=GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}",
+                     options = c(WMSTileOptions(tileSize = 256),
+                                 providerTileOptions(minZoom = 1, maxZoom = 15)),
+                     attribution='<a target="_blank" href="https://www.geoportail.gouv.fr/">Geoportail France</a>',
+                     group = "Plan IGN"
+            ) %>%
+            addTiles("http://wxs.ign.fr/choisirgeoportail/wmts?REQUEST=GetTile&SERVICE=WMTS&VERSION=1.0.0&STYLE=normal&TILEMATRIXSET=PM&FORMAT=image/jpeg&LAYER=ORTHOIMAGERY.ORTHOPHOTOS&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}",
+                     options = c(WMSTileOptions(tileSize = 256),
+                                 providerTileOptions(minZoom = 1, maxZoom = 22)),
+                     attribution='<a target="_blank" href="https://www.geoportail.gouv.fr/">Geoportail France</a>',
+                     group = "Photo aérienne"
+            ) %>%
+            addLayersControl(baseGroups    = c("Photo aérienne", "Plan IGN", "OSM"),
+                             overlayGroups = "Villes",
+                             options       = layersControlOptions(collapsed = FALSE)) %>%
+            fitBounds(lng1 = bb[1], lat1 = bb[2], lng2 = bb[3], lat2 = bb[4])
+})
+```
+[Voir cette version](https://github.com/datagistips/shiny-artif-app/commit/fb67dcc4b87bc13a8cb81847be5c4d5aee1e2b95)
+
+##  Coordonnées au clic
+Trouvons les coordonnées au clic.
+
+### ui.R
+```{r eval = FALSE}
+verbatimTextOutput("foo")
+```
+
+### server.R
+```{r eval = FALSE}
+output$foo <- renderPrint({
+    input$mymap_click
+})
+```
+[Voir cette version](https://github.com/datagistips/shiny-artif-app/commit/a9fd41bd65be309d9a5c9e37835bad164ee9b37c)
+
+##  Rend codeInsee reactive
+Le code INSEE est récupéré dynamiquement après un clic sur la carte.
+
+On rend le code INSEE reactive car il sera utilisé à plusieurs endroits. xxx xxx
+
+[Voir cette version](https://github.com/datagistips/shiny-artif-app/commit/4ac477bd273eaf5db7b0511764c9555182ef423e)
+
+##  Ajoute le reactive
+
+### server.R
+On peut même créer des reactive en cascade, comme ici, pour fComm()
+```{r eval = FALSE}
+fComm <- reactive({
+        fComm <- flux %>% filter(idcom == input$communes)
+        fComm <- flux %>% filter(idcom == codeInsee())
+        return(fComm)
+    })
+```
+
+On utilise le code INSEE pour le streamgraph ([Voir la ligne de code](https://github.com/datagistips/shiny-artif-app/commit/f3d3ffb842c07aaa67a9e4c48b922e8b4fa858dc#diff-ee89f65a0b4e0dccabce1672d6d689b4e2b6ca51ea1e746bdda1eca94aaa6e0fR174)) :
+```{r eval = FALSE}
+myStream <- flux %>% makeStream(codeInsee())
+```
+[Voir cette version](https://github.com/datagistips/shiny-artif-app/commit/f3d3ffb842c07aaa67a9e4c48b922e8b4fa858dc)
+
+##  Fix : ajoute req
+Quand les données ne sont pas encore chargées, on peut avoir des choses bizarres.
+
+Du coup, on introduit req (pour 'requiert') qui exécute la suite seulement si la condition est réalisée :
+```{r eval = FALSE}
+fComm <- reactive({
+    req(codeInsee())
+
+    fComm <- flux %>% filter(idcom == codeInsee())
+    return(fComm)
+})
+```
+[Voir cette version](https://github.com/datagistips/shiny-artif-app/commit/115ac4ea9c236d74fcbfd1cb2d48d3ae6309b063)
+
+##  Ajoute un marqueur
+On crée un proxy à la carte pour réaliser des actions sur la carte :
+```{r eval = FALSE}
+proxy <- leafletProxy("mymap")
+```
+
+On ajoute le centroïde de la commune cliquée
+```{r eval = FALSE}
+observe({
+    req(codeInsee())
+    myComm <- comms %>% filter(INSEE_COM == codeInsee())
+
+    # Ajout du marqueur
+    proxy %>% 
+        clearMarkers() %>% 
+        addMarkers(data = myComm %>% st_centroid)
+})
+```
+[Voir cette version](https://github.com/datagistips/shiny-artif-app/commit/5821ff9c63199ec0bae647a5874f2080bb9d3d5a)
+
+##  Ajoute le contour de la commune
+On ajoute le contour de la commune :
+```{r eval = FALSE}
+proxy %>% 
+    clearShapes() %>% 
+    addPolygons(data = myComm,
+                color = paletteCerema$secondaire$orange, 
+                weight = 1, 
+                smoothFactor = 0.5,
+                opacity = 1, 
+                fillOpacity = 0.3,
+                fillColor = paletteCerema$secondaire$orange,
+                highlightOptions = highlightOptions(color = paletteCerema$secondaire$orange, 
+                                                    weight = 2,
+                                                    fillOpacity = 0.1,
+                                                    bringToFront = TRUE))
+```
+[Voir cette version](https://github.com/datagistips/shiny-artif-app/commit/9b4455e5213c849edcdad0a9d2f905f377f2f84a)
+
+## Va vers la commune
+Au clic, on va automatiquement vers la commune cliquée :
+```{r eval = FALSE}
+bb <- st_bbox(myComm)
+proxy %>%
+    flyToBounds(lng1 = as.numeric(bb$xmin),
+                lat1 = as.numeric(bb$ymin),
+                lng2 = as.numeric(bb$xmax),
+                lat2 = as.numeric(bb$ymax))
+```
+[Voir cette version](https://github.com/datagistips/shiny-artif-app/commit/404f64ab1fbd9fe00dd9da0634faf407007278b5)
+
+##  La liste déroulante permet d'aller vers une commune
+On peut même changer le comportement de la liste déroulante (voir xxx) pour aller vers une commune particulière :
+```{r eval = FALSE}
+observeEvent(input$communes, {
+    codeInsee <- input$communes
+    bb <- comms %>% filter(INSEE_COM == codeInsee) %>% st_bbox %>% as.numeric
+    proxy %>% flyToBounds(lng1 = bb[1], lat1 = bb[2], lng2 = bb[3], lat2 = bb[4])
+})
+```
+
+ObserveEvent déclenche une action lorsqu'on choisit un élément de la liste (`input$communes`)
+
+[Voir cette version](https://github.com/datagistips/shiny-artif-app/commit/d295c184cd8801dfdcc4befb414d98ea8c0d4ea9)
+
+##  Ajoute l'élément vide à la liste des communes
+Généralement, le premier élément d'une liste est une instruction type 'Veuillez choisir une commune'
+
+[Voir cette version](https://github.com/datagistips/shiny-artif-app/commit/4e5c6628148bb98841d8468d10dea8a69b2e5c6d)
+
+##  Précise qu'il faut cliquer sur la carte pour afficher les stats
+Au lieu d'utiliser req (voir xxx), nous pouvons générer un message, en absence de commune sélectionnée pour préciser qu'il faut cliquer sur la carte.
+
+Si aucune commune n'est sélectionnée : valeur nulle, alors on affiche ce message ([Voir la ligne de code](https://github.com/datagistips/shiny-artif-app/commit/56fd55bfa4cc066af658f7c779398c95c8276275?diff=split#diff-ee89f65a0b4e0dccabce1672d6d689b4e2b6ca51ea1e746bdda1eca94aaa6e0fR202-R203))
+:
+```{r eval = FALSE}
+if(is.null(codeInsee())) return(tagList(icon("mouse-pointer"), "Cliquez sur la carte pour afficher les statistiques"))
+```
+[Voir cette version](https://github.com/datagistips/shiny-artif-app/commit/56fd55bfa4cc066af658f7c779398c95c8276275)
+
+## Ajoute la treemap et supprime la légende
+Tiens, ajoutons une treemap.
+
+### ui.R
+```{r eval = FALSE}
+plotlyOutput("treemap")
+```
+
+### server.R
+```{r eval = FALSE}
+output$treemap <- renderPlotly({
+    req(codeInsee())
+    flux %>% makeTreemap(codeInsee())  
+})
+```
+[Voir cette version](https://github.com/datagistips/shiny-artif-app/commit/1edc95aebfe35df74ca77370b78dc1d0402157a6)

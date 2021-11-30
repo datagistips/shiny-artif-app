@@ -15,5 +15,9 @@ ui <- fluidPage(
       uiOutput("uiCommune"),
       uiOutput("streamAndTreemap")
     )
-  )
+  ),
+  hr(),
+  tags$div(
+    includeMarkdown("footer.md"), 
+    style="font-size:0.8em")
 )
